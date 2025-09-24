@@ -1,4 +1,4 @@
 ---
-title: Welcome to my blog
+title: Welcome to my blog!
 ---
-hihihi！I have a blog now!
+Hello fellow millenials! I have big announcement: I'm blogging!
