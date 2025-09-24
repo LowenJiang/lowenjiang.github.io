@@ -1,5 +1,11 @@
 theme: minima
 
 
+title: "My PPO Blog"
+description: "Notes and experiments on reinforcement learning"
+author: "Lowen Jiang"
+email: "you@example.com"
+url: "https://lowenjiang.github.io"
+baseurl: "/skills-github-pages"  
 
 
