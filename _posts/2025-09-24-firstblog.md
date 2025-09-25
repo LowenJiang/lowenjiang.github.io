@@ -122,7 +122,7 @@ $$
 L_{\pi_{\theta}}(\theta') = \mathbb{E}_{s,a \sim \pi_\theta}\left[\frac{\pi_{\theta'} (a|s)}{\pi_{\theta}(a|s)} A^{\pi_{\theta}}(s,a)\right]
 $$
 
-It's gradient at $\theta' = \theta$ is the same as original $\nabla_{\theta} J(\theta)$. Looking closely, we can consider the effect of a policy change:
+It's purpose is to construct a funciton that helps approximate $J_{\theta'}$ surrounding a $J_{\theta}$ . This process can be expressed explicitly, to show how does this approximation takes form, and how good it is:
 
 $$
 \begin{aligned}
@@ -151,7 +151,7 @@ J(\theta') - J(\theta)
 \end{aligned}
 $$
 
-Here, from the LHS we can see clearly how **maximizing the surrogate is thus equivalent to maximizing the $J(\theta')$,** **when the approximation holds**. And the error for approximation $\approx$ comes from changes in state distribution: if $\theta'$ does not deviate too much from the old policy $\theta$, then $p_{\theta}(s_t) \approx p_{\theta'}(s_t)$, and we may gracefully maximize $L_{\pi_{\theta}}(\theta')$ with equanimity. The process of finding a good new policy thus becomes: to find a new $\theta'$ that can redistribute optimally the probability weights on the advantage of each step. **Now we can say our goal has shifted to maximize $L_{\pi_\theta}(\theta')$, where $\theta' \approx \theta$ .**
+Here, from the LHS we can see clearly how **maximizing the surrogate is thus equivalent to maximizing the $J(\theta')$,** **when the approximation holds**. And the error for approximation $\approx$ comes from changes in state distribution: if $\theta'$ does not deviate too much from the old policy $\theta$, then $p_{\theta}(s_t) \approx p_{\theta'}(s_t)$, and we may happily maximize $L_{\pi_{\theta}}(\theta')$. The process of finding a good new policy thus becomes: to find a new $\theta'$ that can redistribute optimally the action probability weights on the advantage of each step. **Now we can say our goal has shifted to maximize $L_{\pi_\theta}(\theta')$, where $\theta' \approx \theta$ .**
 ## **How to constraint this locality**?
 
 What prevents us from arbitrarily defining a new policy that exploits these advantage function is the fact that this formulation only makes sense locally. Thus, we need to add a constraint to bound how far $\theta$ can go. One way is to use Kullbeck-Leibler Divergence, which measures how different two distributions are. One can bound the KL divergence between old and new policy by $\epsilon$, and rewrite the constraint into the surrogate objective via Lagrangian multiplier $\lambda$:
