@@ -1,9 +1,6 @@
-remote_theme: alshedivat/al-folio
-plugins:
-  - jekyll-remote-theme
-
-
+theme: minima
 title: "Wolin's Whim"
+
 
 
 
