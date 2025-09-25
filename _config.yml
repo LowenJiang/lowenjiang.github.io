@@ -1,5 +1,14 @@
-theme: minima
+remote_theme: mmistakes/minimal-mistakes
+plugins:
+  - jekyll-remote-theme
+
+# math support
+markdown: kramdown
+kramdown:
+  math_engine: mathjax
+  
 title: "Wolin's Whim"
+
 
 
 
