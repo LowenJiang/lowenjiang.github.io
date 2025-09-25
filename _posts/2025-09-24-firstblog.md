@@ -1,7 +1,6 @@
 ---
 title: Form REINFORCE to PPO - Classic Policy Gradient Methods Revisited
 date: 2025-09-24
-usemathjax: true
 ---
 
 ## **Stitching the narrative arc**
