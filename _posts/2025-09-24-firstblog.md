@@ -105,7 +105,7 @@ Notice how we are not assessing $J(\theta)$ directly. Now mentally we may constr
 $$
 L_{\pi_\theta}(\theta') =\mathbb{E}_{s,a \sim \pi_{\theta}}\!\left[ \frac{\pi_{\theta'}(a|s)}{\pi_{\theta}(a|s)} \, A^{\pi_{\theta}}(s,a) \right] $$
 
-Note that this is linear to $ \pi_{\theta'}(a|s) $ , and it just re-weights the advantage estimates according to how much probability the new policy puts on each action. (How to interpret this geometrically I am still pondering). It does not touch $J$ in value, but it does so in slope: when we take gradient at $\theta' \rightarrow \theta$, $\nabla_{\theta'}L_{\pi_\theta}(\theta')$ coincides with $\nabla_\theta J(\theta)$.
+Note that this is linear to $\pi_{\theta'}(a\mid s)$, and it just re-weights the advantage estimates according to how much probability the new policy puts on each action. (How to interpret this geometrically I am still pondering.) It does not touch $J$ in value, but it does so in slope: when we take the gradient at $\theta' \to \theta$, $\nabla_{\theta'} L_{\pi_\theta}(\theta')$ coincides with $\nabla_\theta J(\theta)$.
 
 $$
 \nabla_{\theta'}L_{\pi_\theta}(\theta')\big|_{\theta'=\theta} = \mathbb{E}_{s,a \sim \pi_{\theta}}\!\left[ \frac{\nabla_{\theta'}\pi_{\theta'}(a|s)}{\pi_{\theta}(a|s)} \, A^{\pi_{\theta}}(s,a) \right] =\mathbb{E}_{s,a \sim \pi_\theta}\!\left[ \nabla_\theta \log \pi_\theta(a|s)\, A^{\pi_\theta}(s,a) \right] = \nabla_\theta J
