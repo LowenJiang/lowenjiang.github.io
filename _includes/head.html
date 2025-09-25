@@ -9,20 +9,22 @@
     {%- include google-analytics.html -%}
   {%- endif -%}
 
-  <!-- MathJax Support -->
-  {% if page.usemathjax %}
+  <!-- MathJax Support - Global -->
   <script>
-  console.log("MathJax loading for page with usemathjax: true");
   window.MathJax = {
     tex: {
       inlineMath: [['$', '$'], ['\\(', '\\)']],
       displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      processEscapes: true
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      ignoreHtmlClass: 'tex2jax_ignore',
+      processHtmlClass: 'tex2jax_process'
     }
   };
   </script>
   <script type="text/javascript" id="MathJax-script" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
   </script>
-  {% endif %}
 </head>
