@@ -1,7 +1,10 @@
-theme: minima
+remote_theme: alshedivat/al-folio
+plugins:
+  - jekyll-remote-theme
+
+
 title: "Wolin's Whim"
-markdown: kramdown
-usemathjax: true
+
 
 
 
