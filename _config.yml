@@ -1,6 +1,8 @@
 theme: minima
 title: "Wolin's Whim"
 markdown: kramdown
+usemathjax: true
+
 
 
 
