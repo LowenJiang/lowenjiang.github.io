@@ -1,6 +1,7 @@
 theme: minima
 title: "Wolin's Whim"
 markdown: kramdown
+math_engine: mathjax
 
 
 
