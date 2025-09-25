@@ -122,7 +122,7 @@ $$
 L_{\pi_{\theta}}(\theta') = \mathbb{E}_{s,a \sim \pi_\theta}\left[\frac{\pi_{\theta'} (a|s)}{\pi_{\theta}(a|s)} A^{\pi_{\theta}}(s,a)\right]
 $$
 
-It's purpose is to construct a funciton that helps approximate $J_{\theta'}$ surrounding a $J_{\theta}$ . This process can be expressed explicitly, to show how does this approximation takes form, and how good it is:
+It's purpose is to construct a function on $\theta'$ that helps approximate $J_{\theta'}$ surrounding a $J_{\theta}$ . This process can be expressed explicitly, to show how this approximation takes form, and how good it is:
 
 $$
 \begin{aligned}
@@ -164,6 +164,8 @@ L_{\pi_\theta}(\theta', \lambda) &= \mathbb{E}_{s,a \sim \pi_\theta}\left[\frac{
 &\text{(Trust Region Policy Optimization)}
 \end{align}
 $$
+
+(P.S.: There is a proof in the original TRPO paper showing that constraining KL divergence also limits changes in the state distribution under certain ergodicity assumptions; I haven’t included it here.)
 
 Since $\theta'$ is close to $\theta$, we can simply perform Taylor expansion around the old policy $\theta$! - Since KL has a quadratic form locally, the Fisher matrix acts as its curvature, in other words, $F$ is second order approximation for KL divergence.$$D_{KL}(\pi_\theta \,\|\, \pi_{\theta’}) \;\approx\; \tfrac{1}{2} (\theta’ - \theta)^\top F(\theta)(\theta’ - \theta),$$(Oh, where does the 1/2 come from? Fisher information matrix is Hessian for KL divergence at $\theta' = \theta$, and 1/2 comes from second order Taylor expansion.)
 
