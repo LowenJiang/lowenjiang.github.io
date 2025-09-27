@@ -1,3 +1,8 @@
+---
+title: Form REINFORCE to PPO - Classic Policy Gradient Methods Revisited
+date: 2025-09-24
+---
+
 # Form REINFORCE to PPO: Classic Policy Gradient Methods revisited
 
 ## **Stitching the narrative arc**
