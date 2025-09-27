@@ -2,13 +2,20 @@
 title: Form REINFORCE to PPO - Classic Policy Gradient Methods Revisited
 date: 2025-09-24
 ---
-
 # Form REINFORCE to PPO: Classic Policy Gradient Methods revisited
 
 ## **Stitching the narrative arc**
-When I started studying reinforcement learning, I found blogs to be a very good medium for gaining intuition. There are as many ways of presenting ideas as there are bloggers online. Yet I sometimes find myself struggling to see how the various algorithm boxes fit together into a coherent picture. Inspired by other blogs in the area (@Seita's place and @lil'log), and the recognition how a coherent narrative is conductive to deeper understanding, I decided to write down my own learning diary here. My aim is threefold: to fully understand the logic by writing it down, to create a scaffold I can revisit in the future, and to share the process with anyone who might find value in it. I try to keep the flow didactic, the language casual, and the math tight. There are bound to be typøs, despite my best intentions. All notations apart from the typøs follow Andrew Barto and Richard Sutton's Introduction to Reinforcement Learning.
+When I started studying reinforcement learning, I found blogs to be a very good medium for gaining intuition. There are as many ways of presenting ideas as there are bloggers online. Yet I sometimes find myself struggling to see how the various algorithm boxes fit together into a coherent picture. Inspired by other blogs in the area (@Seita's place and @lil'log), and the recognition that a coherent narrative is conductive to deeper understanding, I decided to write down my own learning diary here. My aim is threefold: to fully understand the logic by writing it down, to create a scaffold I can revisit in the future, and to share the process with anyone who might find value in it. I try to keep the flow didactic, the language casual, and the math tight. There are bound to be typøs, despite my best intentions. All notations apart from the typøs follow Andrew Barto and Richard Sutton's Introduction to Reinforcement Learning.
 
-Policy gradients and value-based are two families of methods. Suppose we want to arrive at a place, I tend to think of value-based as drawing a map, whereas policy gradients is like building intuition. With that, policy gradients handle stochastic policy more naturally. Here we focus on the policy gradients family, specifically how the vanilla REINFORCE logically develops into PPO.
+Policy gradients and value-based are two families of methods. Suppose we want to arrive at a place, I tend to think of value-based as drawing a map, whereas policy gradients is like building intuition. Analogies away, **value-based** methods always train a $Q(s,a)$ function (at least for model-free cases), and the policy is implicit: one may choose a policy, say greedy ($a = \arg \max_{a} Q(s,a)$) or exploratory ($\epsilon$ greedy, softmax, UCB). 
+
+Contrarily, the **policy-based** methods define a policy function $\pi(s,a)$ (which represents the probability of taking a said action) and directly iterate on that. For discrete actions, logits from a network go through softmax; for continuous actions, policies can be Gaussian:
+
+$$\pi_\theta(a|s) = \frac{e^{h_\theta(s,a)}}{\sum_{a’} e^{h_\theta(s,a’)}} \quad \quad \pi_\theta(a|s)=\mathcal N(\mu_\theta(s), \Sigma_\theta(s))$$
+
+A subtle point of comparison: what's the difference between weighing-Q-values and defining a policy? On the surface, both measures a (state, action); but Q values must satisfy Bellman equation whereas policy values do not. Quintessentially, that is why we can later bootstrap value functions, and why policy methods suffer from high variance.
+
+Here we focus on the policy gradients family, specifically how the vanilla REINFORCE logically develops into PPO.
 
 The fundamental goal of Policy Gradients is to select a $\theta = \arg \max J_{\pi}(\theta)$ , namely, find a parameter $\theta$ for policy $\pi_\theta$ that maximizes $J_\pi(\theta)$ , which is (on average) how much rewards an episode collects under a policy $\pi_{\theta}$.
 
@@ -19,7 +26,7 @@ J_{\pi}(\theta) = \mathbb{E}\left[ \sum_{t=0}^{\infty} \gamma^{t}r(s_t, a_t)\rig
 $$
 ## **How do we maximize this objective?**
 
-We can use $\theta$ to take gradient ascent steps w.r.t $J_\pi$ : this step can be derived neatly from definition, or in[ Berkeley CS285 Notes.](https://rail.eecs.berkeley.edu/deeprlcourse/deeprlcourse/static/slides/lec-5.pdf)
+We can use $\theta$ to take gradient ascent steps w.r.t $J_\pi$ : this step can be derived neatly from definition, or per [ Berkeley CS285 Notes.](https://rail.eecs.berkeley.edu/deeprlcourse/deeprlcourse/static/slides/lec-5.pdf)
 
 $$
 
@@ -219,7 +226,6 @@ J(\theta') - J(\theta) &= J(\theta') - \mathbb{E}_{s_0 \sim p(s_0)} \\
 \end{align}
 
 $$
-
  
 Here, from the LHS we can see clearly how **maximizing the surrogate is thus equivalent to maximizing the $J(\theta')$,** **when the approximation holds**. And the error for approximation $\approx$ comes from changes in state distribution: if $\theta'$ does not deviate too much from the old policy $\theta$, then $p_{\theta}(s_t) \approx p_{\theta'}(s_t)$, and we may gracefully maximize $L_{\pi_{\theta}}(\theta')$ with equanimity. The process of finding a good new policy thus becomes: to find a new $\theta'$ that can redistribute optimally the probability weights on the advantage of each step. **Now we can say our goal has shifted to maximize $L_{\pi_\theta}(\theta')$, where $\theta' \approx \theta$ .**
 ## **How to constraint this locality**?
