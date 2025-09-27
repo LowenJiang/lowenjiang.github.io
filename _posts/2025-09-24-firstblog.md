@@ -24,6 +24,7 @@ $$
 J_{\pi}(\theta) = \mathbb{E}\left[ \sum_{t=0}^{\infty} \gamma^{t}r(s_t, a_t)\right] = \mathbb{E}_{\tau \sim \pi_\theta}\left[r(\tau)\right]
 
 $$
+
 ## **How do we maximize this objective?**
 
 We can use $\theta$ to take gradient ascent steps w.r.t $J_\pi$ : this step can be derived neatly from definition, or per [ Berkeley CS285 Notes.](https://rail.eecs.berkeley.edu/deeprlcourse/deeprlcourse/static/slides/lec-5.pdf)
