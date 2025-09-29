@@ -203,6 +203,7 @@ $$\begin{align}
 L^{CLIP+VF+S}(\theta) &= 
 \mathbb{E}_t \Big[ L_t^{CLIP}(\theta) - c_1 L_t^{VF}(\theta) + c_2 S[\pi_\theta](s_t) \Big] \\\\
 &(\text{Proximal Policy Optimiation})\end{align}$$
+
 Where S is the entropy term that functions as a regularizer to encourage sufficiently exploratory policies, and is independent of the reward signals. From the actor-critic perspective, we may use the same $\lambda$ for GAE(Generalized Advantage Estimator) (policy) and TD($\lambda$) (value function), which controls how the reward signals flow into objective function. Those are all tricks about finding balance between Monte Carlo and TD(0). 
 ## **Closing note: Bias-Stability-Variance tradeoff**
 From vanilla REINFORCE, we have finally arrived at PPO — a method that openly embraces **controlled bias** in exchange for stability and variance reduction.
