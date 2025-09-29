@@ -114,11 +114,10 @@ $$
 Notice how we are not assessing $J(\theta)$ directly. Now mentally we may construct another optimization problem: suppose we stand firmly on $\theta$, and look around for a $\theta'$ that's "better". Instead of rolling out an $J(\theta')$ estimate for each $\theta'$, We may construct a surrogate objective $L_{\pi_\theta}(\theta')$ to maximize:
 $$L_{\pi_\theta}(\theta') =\mathbb{E}_{s,a \sim \pi_{\theta}}\!\left[ \frac{\pi_{\theta'}(a|s)}{\pi_{\theta}(a|s)} \, A^{\pi_{\theta}}(s,a) \right] $$
 Note that this is linear to $\pi_{\theta'}(a|s)$, and it just re-weights the advantage estimates according to how much probability the new policy puts on each action. (How to interpret this geometrically I am still pondering). It does not touch $J$ in value (easy to prove $L_{\pi_\theta}(\theta) = 0$) but it does so in slope: when we take gradient at $\theta' \rightarrow \theta$, $\nabla_{\theta'}L_{\pi_\theta}(\theta')$ coincides with $\nabla_\theta J(\theta)$.
+
 $$\nabla_{\theta'}L_{\pi_\theta}(\theta')\big|_{\theta'=\theta} = \mathbb{E}_{s,a \sim \pi_{\theta}}\!\left[ \frac{\nabla_{\theta'}\pi_{\theta'}(a|s)}{\pi_{\theta}(a|s)} \, A^{\pi_{\theta}}(s,a) \right] =\mathbb{E}_{s,a \sim \pi_\theta}\!\left[ \nabla_\theta \log \pi_\theta(a|s)\, A^{\pi_\theta}(s,a) \right] = \nabla_\theta J
-
-  
-
 $$
+
 The intuition is that, locally this new-policy function approximate $J$ function gradient-wise. Which is what surrogate is for: a acting substitute, an ersatz. **Instead of taking a vanilla policy gradient or natural gradient step, which could be unstable, this new approach allows us to find a preferable *in the vicinity (Constrained by KL divergence, see below)* of $\theta$, while still measuring in the trajectories and advantages of the old policy.**  After an aside on off-policy I'll go into details on this vicinity constraint. 
 
 (P.S.: Vanilla PG is unstable because the gradient is only valid locally; if the update is too large, the state distribution shifts, variance explodes, and the step may actually decrease true performance)
