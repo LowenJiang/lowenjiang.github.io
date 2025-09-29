@@ -172,7 +172,8 @@ $$\mathbb{E}_{s\sim \eta(\theta)} [D_{KL}(\pi_{\theta}(\cdot\mid s), \pi_{\theta
 
 The first term becomes zero, which is intuitive: the trajectories following the same policy doesn't update the advantage expectation. To express more precisely, 
 
-$\mathbb{E}_{a\sim \pi\theta(\cdot|s)}[A^{\pi_\theta}(s,a)] = \sum_a \pi_\theta(a|s)\,(Q^{\pi_\theta}(s,a)-V^{\pi_\theta}(s)) = V^{\pi_\theta}(s)-V^{\pi_\theta}(s) = 0.$
+$$\mathbb{E}_{a\sim \pi\theta(\cdot|s)}[A^{\pi_\theta}(s,a)] = \sum_a \pi_\theta(a|s)\,(Q^{\pi_\theta}(s,a)-V^{\pi_\theta}(s)) = V^{\pi_\theta}(s)-V^{\pi_\theta}(s) = 0
+$$
 
 So the expanded version: 
 
