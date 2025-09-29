@@ -205,8 +205,9 @@ $$
 Which clips the extent to which the new policy can exploit juicy steps. For a step with reward or penalty, we want to nudge the parameter to exploit it; but this is capped by $[1-\epsilon, 1+\epsilon ]$. Another more intuitive way to look at it: We want to slide our $\theta$ in parameter space to maximize $L^{CLIP}(\theta')$. When moving towards one direction, benefits from a certain step hit a ceiling (or a bottom ceiling for negative advantage, which some people call a floor), that gives us leeway (because of zero gradient) to move around the $\theta$ to see if we can gain improvements from other steps - perhaps we'll hit ceiling on them as well, and so on. In this case the large policy change is not penalized - but also not preferred, when there are other options to shift $\theta$ that leads to gains in other steps.
 
 When value function and policy share the same network of parameters, the actor-critic update can be combined into maximizing a single objective:
+
 $$\begin{align}
-L^{CLIP+VF+S}(\theta) &= 
+& L^{CLIP+VF+S}(\theta) = 
 \mathbb{E}_t \Big[ L_t^{CLIP}(\theta) - c_1 L_t^{VF}(\theta) + c_2 S[\pi_\theta](s_t) \Big] \\\\
 &(\text{Proximal Policy Optimiation})\end{align}$$
 
