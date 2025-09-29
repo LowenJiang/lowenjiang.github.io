@@ -157,6 +157,7 @@ Nice! From this little transformation we can see that importance sampling factor
 ## **Going deeper in the vicinity...**
 
 What prevents us from arbitrarily defining a new policy that exploits the old advantage function is the fact that this formulation only makes sense locally,. Thus, we need to add a constraint to bound how far $\theta$ can go. In TRPO they use an **averaged** Kullbeck-Leibler Divergence, which measures how different two distributions are. One can bound the KL divergence between old and new policy by $\delta$, and the constrained optimization becomes: 
+
 $$\begin{align}
 \max
 L_{\pi_\theta}(\theta') &= \mathbb{E}_{s,a \sim \pi_\theta}\left[\frac{\pi_{\theta'} (a|s)}{\pi_\theta(a|s)} A^{\pi_\theta}(s,a)\right]\\ \\
@@ -165,6 +166,7 @@ s.t. \quad \mathbb{E}&_{s\sim \eta(\theta)} [D_{KL}(\pi_{\theta}(\cdot\mid s), \
 \\\\ &\text{(Trust Region Policy Optimization)}
 \end{align}
 $$
+
 Some extra thoughts here, not necessarily correct. If we construct an Lagrangian for this, since $\theta'$ is close to $\theta$, we can simply perform Taylor expansion around the old policy $\theta$!  KL has a quadratic form locally, and the Fisher matrix acts as its curvature (recall natural gradient), in other words, $F$ is second order approximation for KL divergence.
 $$\mathbb{E}_{s\sim \eta(\theta)} [D_{KL}(\pi_{\theta}(\cdot\mid s), \pi_{\theta'}(\cdot\mid s)) ] \;\approx\; \tfrac{1}{2} (\theta’ - \theta)^\top F(\theta)(\theta’ - \theta),$$(Oh, where does the 1/2 come from? Fisher information matrix is Hessian for KL divergence at $\theta' = \theta$, and 1/2 comes from second order Taylor expansion.)
 
@@ -175,27 +177,25 @@ $\mathbb{E}_{a\sim \pi\theta(\cdot|s)}[A^{\pi_\theta}(s,a)] = \sum_a \pi_\theta(
 So the expanded version: 
 
 $$
-
 L_{\pi_\theta}(\theta',\lambda)
 \approx \underbrace{L_{\pi_\theta}(\theta)}_{=0}
 + \nabla_{\theta'}L_{\pi_\theta}(\theta')(\theta'-\theta)
 -\tfrac{\lambda}{2}(\theta'-\theta)^\top F(\theta)(\theta'-\theta)
 +\lambda\,\delta.
 $$
+
 Intuitively, this means the KL constraint defines an ellipsoid around the old policy, and TRPO finds the best direction inside that trust region. Does the RHS return $\theta^{\star}$ in closed form? That connects surprisingly to convex optimization 🤔 
 
-(P.S. Actually, upon closer reading, the TRPO did mention giving a closed form $\theta'$ using natural policy gradients, but it does not achieve )
 ## **KL Divergence is expensive, are there easier ways to constrain policy change?**
 
 Finally, we're at the last piece of puzzle. KL divergence requires us to perform second order approximation around the trust region, which can be quite computationally expensive. PPO simplifies this process while retaining similar performance. Instead of using a lagrangian to regularize, PPO uses a clipped objective. $r_t(\theta')$ is short for:
 $$r_t(\theta') = \frac{\pi_{\theta'}(a_t \mid s_t)}{\pi_{\theta}(a_t \mid s_t)}$$
+
 $$\max L^{\text{CLIP}}(\theta') 
-
-  
-
 = {\mathbb{E}}_t \left[\min \big(r_t(\theta')\,{A}_t, \;\text{clip}(r_t(\theta'), 1-\epsilon, 1+\epsilon)\,{A}_t
-
-    \big) \right]$$
+ \big) \right]
+$$
+    
 Which clips the extent to which the new policy can exploit juicy steps. For a step with reward or penalty, we want to nudge the parameter to exploit it; but this is capped by $[1-\epsilon, 1+\epsilon ]$. Another more intuitive way to look at it: We want to slide our $\theta$ in parameter space to maximize $L^{CLIP}(\theta')$. When moving towards one direction, benefits from a certain step hit a ceiling (or a bottom ceiling for negative advantage, which some people call a floor), that gives us leeway (because of zero gradient) to move around the $\theta$ to see if we can gain improvements from other steps - perhaps we'll hit ceiling on them as well, and so on. In this case the large policy change is not penalized - but also not preferred, when there are other options to shift $\theta$ that leads to gains in other steps.
 
 When value function and policy share the same network of parameters, the actor-critic update can be combined into maximizing a single objective:
