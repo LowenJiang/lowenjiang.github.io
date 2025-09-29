@@ -130,16 +130,20 @@ The intuition is that, locally this new-policy function approximate $J$ function
 Both uses **importance sampling** ratio. My understanding is, off-policy pg seeks to improve an existing policy by sampling another (perhaps more exploratory) policy, whereas TPRO takes a fixed policy and estimate another surrounding policy from it. 
 
 *A brief recap on off-policy policy gradients:* we have a target $\pi_\theta$, its advantage function $A^{\pi_\theta}$, and sampling from another policy $\mu$.  Intuitively, If a (state, action) is much rarer in sampling policy $\mu$ than target $\theta$, and since we are taking an expectation of advantage-weighted grad-logs, then we must magnify the effect of such samples. Thus, the policy gradient is:
+
 $$
 \nabla_\theta J(\theta)
 = \mathbb{E}_{s,a\sim \mu} \left[ \frac{\pi_\theta(a|s)}{\mu(a|s)} \nabla_\theta \log \pi_\theta(a|s)\, A^{\pi_\theta}(s,a) \right].
 $$
+
 Aside of an aside: why didn't I write discount term here? It is implicit in the -- state distribution subscript. 
 
 *Back to the TRPO objective: given one policy $\theta$,* how to measure the performance of another policy $\theta'$ ? Starting from an identity: [proof](https://rail.eecs.berkeley.edu/deeprlcourse/deeprlcourse/static/slides/lec-9.pdf) of this utilizes the fact that starting state distribution is the same under different policies. 
+
 $$
 J(\theta ') = J(\theta) + \mathbb{E}_{s,a \sim \pi_{\theta'}}\left[ \sum_{t=0}^{\infty}\gamma^{t}A^{\pi_\theta}(s_t,a_t)\right]
 $$
+
 And directly following this, 
 
 $$
@@ -152,6 +156,7 @@ J(\theta') - J(\theta) &=
 &= L_{\pi_{\theta}}(\theta') 
 \end{aligned}
 $$
+
 Nice! From this little transformation we can see that importance sampling factor comes from re-weighing the action when changing policy. And we approximate by assuming state-distribution isn't straying too far (In **chapter 3** there's a [proof](https://arxiv.org/abs/1502.05477) that if we keep KL divergence constrained, finding $\theta^{\star}=\arg \max L_{\pi_\theta}(\theta')$ monotonically improves our $J$ function :)
 
 ## **Going deeper in the vicinity...**
@@ -190,6 +195,7 @@ Intuitively, this means the KL constraint defines an ellipsoid around the old po
 ## **KL Divergence is expensive, are there easier ways to constrain policy change?**
 
 Finally, we're at the last piece of puzzle. KL divergence requires us to perform second order approximation around the trust region, which can be quite computationally expensive. PPO simplifies this process while retaining similar performance. Instead of using a lagrangian to regularize, PPO uses a clipped objective. $r_t(\theta')$ is short for:
+
 $$r_t(\theta') = \frac{\pi_{\theta'}(a_t \mid s_t)}{\pi_{\theta}(a_t \mid s_t)}$$
 
 $$\max L^{\text{CLIP}}(\theta') 
