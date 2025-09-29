@@ -2,43 +2,27 @@
 title: Form REINFORCE to PPO - Classic Policy Gradient Methods Revisited
 date: 2025-09-24
 ---
-# Form REINFORCE to PPO: Classic Policy Gradient Methods revisited
-
 ## **Stitching the narrative arc**
-When I started studying reinforcement learning, I found blogs to be a very good medium for gaining intuition. There are as many ways of presenting ideas as there are bloggers online. Yet I sometimes find myself struggling to see how the various algorithm boxes fit together into a coherent picture. Inspired by other blogs in the area (@Seita's place and @lil'log), and the recognition that a coherent narrative is conductive to deeper understanding, I decided to write down my own learning diary here. My aim is threefold: to fully understand the logic by writing it down, to create a scaffold I can revisit in the future, and to share the process with anyone who might find value in it. I try to keep the flow didactic, the language casual, and the math tight. There are bound to be typøs, despite my best intentions. All notations apart from the typøs follow Andrew Barto and Richard Sutton's Introduction to Reinforcement Learning.
+When I started studying reinforcement learning, I found blogs to be a very good medium for gaining intuition. There are as many ways of presenting ideas as there are bloggers online. Yet I sometimes find myself struggling to see the connective tissue between different algorithm boxes. Inspired by other blogs in the area (@Seita's place and @lil'log), and the recognition how human mind craves narrative, I decided to write down my own learning diary here - Not that the world needs yet another ML blogger, but the aim is threefold: to clarify the logic by writing it down, to create a scaffold I can revisit in the future (and thus a daguerreotype of understanding), and to share the process with anyone who might find value in it. I try to keep the flow didactic, the language casual, and the math tight. There are bound to be typøs, despite my best intentions. I notice I sometimes use the pronoun we in writing, but we don't deem that to be an issue. All notations apart from the typös follow Andrew Barto and Richard Sutton's Introduction to Reinforcement Learning. 
 
-Policy gradients and value-based are two families of methods. Suppose we want to arrive at a place, I tend to think of value-based as drawing a map, whereas policy gradients is like building intuition. Value-based RL learns action values $Q(s,a)$ and induces a policy by acting near-greedily (i.e. $\epsilon$-greedy). Some algorithms for value-based methods: SARSA, Q-Learning, DQN, etc. 
-
-Contrarily, the **policy-based** methods parameterizes a policy function $\pi(s,a)$ (which represents the probability of taking a given action) and directly pushes parameter by estimating $J_\theta$. For discrete actions, logits from a network go through softmax; for continuous actions, policies can be Gaussian:
-
-$$\pi_\theta(a|s) = \frac{e^{h_\theta(s,a)}}{\sum_{a’} e^{h_\theta(s,a’)}} \quad \quad \pi_\theta(a|s)=\mathcal N(\mu_\theta(s), \Sigma_\theta(s))$$
-
-A subtle question: what's the difference between softmax-weighing-Q-values and a discrete policy? On the surface, both measures a (state, action) preference; but Q values must satisfy Bellman equation whereas policy do not. Quintessentially, that is why we can later bootstrap value functions in Actor-Critic, and why policy methods suffer from high variance.
-
-Here we focus on the policy gradients family, specifically how the vanilla REINFORCE logically develops into PPO.
+Policy gradients and value-based are two families of methods, which are very loosely analogous to drawing a map (learning a $Q$ and/or $V$ function) vs becoming a better driver (update the $\pi$ directly). Policy gradients handle and stochastic policy more naturally, although I doubt whether a softmax layer on $Q$ can also do that. Here we focus on the policy gradients family, specifically how the vanilla REINFORCE logically develops into PPO.
 
 The fundamental goal of Policy Gradients is to select a $\theta = \arg \max J_{\pi}(\theta)$ , namely, find a parameter $\theta$ for policy $\pi_\theta$ that maximizes $J_\pi(\theta)$ , which is (on average) how much rewards an episode collects under a policy $\pi_{\theta}$.
 
 $$
-
 J_{\pi}(\theta) = \mathbb{E}\left[ \sum_{t=0}^{\infty} \gamma^{t}r(s_t, a_t)\right] = \mathbb{E}_{\tau \sim \pi_\theta}\left[r(\tau)\right]
-
 $$
+
 ## **How do we maximize this objective?**
 
-We can use $\theta$ to take gradient ascent steps w.r.t $J_\pi$ : this step can be derived neatly from definition, or per [ Berkeley CS285 Notes.](https://rail.eecs.berkeley.edu/deeprlcourse/deeprlcourse/static/slides/lec-5.pdf)
+We can use $\theta$ to take gradient ascent steps w.r.t $J_\pi$ : this step can be derived neatly from definition, or in[ Berkeley CS285 Notes.](https://rail.eecs.berkeley.edu/deeprlcourse/deeprlcourse/static/slides/lec-5.pdf)
 
 $$
-
 \begin{align}
-
 \nabla_{\theta} J_{\pi}(\theta) &= \int p_{\theta}(\tau)r(\tau)d\tau\\
-
 &= \mathbb{E}_{\tau\sim\pi_{\theta}}\left[ \left( \sum_{t=0}^{\infty} \gamma ^{t}r_{t+1} \right) \left( \sum_{t=0}^{\infty} \nabla \log \pi _{\theta}(a_t| s_t)\right) \right]\\\\
 &(\text{REINFORCE})
-
 \end{align}
-
 $$
 
 This means: to find the direction to improve $J$, we sample some episodes, and take the episodic rewards $\times$ preferred direction for this trajectory. One simply REINFORCES trajectories that leads to higher yields.
@@ -47,67 +31,63 @@ This means: to find the direction to improve $J$, we sample some episodes, and t
 Recall that we have $Q^{\pi}(S_t, A_t)$ defined as discounted sum of rewards after taking $s_t, a_t$ following $\pi$. It'd be nice to plug this in, but right now the summed reward is episode-wide, so some extra work is needed to connect the REINFORCE with value-functions.
 
 $$
-
 \begin{align}
-
 \nabla_{\theta} J_{\pi}(\theta) &= \mathbb{E}_{\tau \sim \pi_{\theta}}\left[ \left( \sum_{t=0}^{\infty} \gamma^{t}r_{t+1} \right) \left( \sum_{t=0}^{\infty} \nabla \log \pi _{\theta}(a_t| s_t)\right) \right] \\ &=
-
 \mathbb{E}_{\tau \sim \pi_{\theta}}\left[ \sum_{t^{\prime}=0}^{\infty} \gamma^{t'}r_{t^{\prime}+1} \sum_{t=0}^{t'} \nabla \log \pi _{\theta}(a_t| s_t) \right] \\
-
-  
-
-&= \mathbb{E}_{\tau \sim \pi_{\theta}}\left[ \sum_{t^{\prime}=0}^{\infty}\nabla \log \pi _{\theta}(a_t| s_t)\sum_{t=t'}^{\infty}\gamma ^{t}r_{t+1} \right]
-
-  
-
+&= \mathbb{E}_{\tau \sim \pi_{\theta}}\left[ \sum_{t^{\prime}=0}^{\infty}\nabla \log \pi _{\theta}(a_t| s_t)\sum_{t=t'}^{\infty}\gamma ^{t}r_{t+1} \right]  
 \end{align}
-
 $$
 
-This is a trick using the fact: $\mathbb{E}_{s_{0:\infty}, a_{0:\infty}}[r(t)] = \mathbb{E}_{s_{0:t}, a_{0:t}}[r(t)]$, namely: the expectation of a certain reward step does not depend on the transition steps beyond it. So for each $r_t$ we may only keep the trajectory transition leading up to it. This helps us rewrite the sum of $r_t+$ as an estimated $t$-th step Monte Carlo estimate $G_t$:
+This is a trick using the fact: 
 
 $$
+\mathbb{E}_{s_{0:\infty}, a_{0:\infty}}[r(t)] = \mathbb{E}_{s_{0:t}, a_{0:t}}[r(t)] 
+$$
 
+namely: the expectation of a certain reward step does not depend on the transition steps beyond it. So for each $r_t$ we may only keep the trajectory transition leading up to it. This helps us rewrite the sum of $r_t+$ as an estimated $t$-th step Monte Carlo estimate $G_t$:
+
+$$
 \begin{align}
-
 \nabla_{\theta} J_{\pi}(\theta) &=
-
 \mathbb{E}_{\tau \sim \pi_{\theta}}\left[ \left( \sum_{t=0}^{\infty} r_{t+1} \right) \left( \sum_{t=0}^{\infty} \nabla \log \pi _{\theta}(a_t| s_t)\right) \right] \\&= \mathbb{E}_{\tau \sim \pi_{\theta}}\left[ \sum_{t=0}^{\infty}\nabla \log \pi _{\theta}(a_t| s_t)\gamma^{t}G_t \right]
-
 \end{align}
-
 $$
 
 Intuitively, this sums up every single gradient for all steps in all episodes, and each gradient is scaled by how good its step is. It assigns good scores to advantageous state-actions. Since $G_t$ is the Monte Carlo estimate of a single rollout,  we have the following relationship: 
-$$\mathbb{E}_{s_t,a_t \sim \pi_{\theta}}\left[G_t \mid(s_t, a_t)\right] = Q^{\pi}(s_t, a_t)$$
+
+$$
+\mathbb{E}_{s_t,a_t \sim \pi_{\theta}}\left[G_t \mid(s_t, a_t)\right] = Q^{\pi}(s_t, a_t)
+$$
+
 ## **How does this connect to Actor-Critic?**
 
 For each timestamp, suppose we have an estimate of state values, we can use this as a baseline to reduce variance. Interestingly, this state-based baseline does not affect the bias, so it's always preferable to use it.
 
 $$
-
 \begin{align}
-
 \mathbb{E}\left[ \sum_{t=0}^{\infty}\nabla \log \pi _{\theta}(a_t| s_t)G_t \right] &= \mathbb{E}\left[ \sum_{t^{\prime}=0}^{\infty}\nabla \log \pi _{\theta}(a_t| s_t)(G_t - V^{\pi}(s_t)\right] \\ &= \mathbb{E}\left[ \sum_{t=0}^{\infty}\nabla \log \pi _{\theta}(a_t| s_t)A^{\pi}(s_t, a_t)\right] \\ &= \mathbb{E}\left[ \sum_{t=0}^{\infty}\nabla \log \pi _{\theta}(a_t| s_t)\left(r(s_t, a_t) + \gamma \hat{V}^{\pi}(s_{t+1}) - \hat{V}^{\pi}(s_t)\right)\right]
-
 \end{align}
-
 $$
 
 Introducing state-value baseline has multiple implications: this allows algorithm to reduce variance while keeping unbiased, leads to actor-critic style implementation, and introduces advantage function. When writing G-V down as TD error, we can directly bootstrap V function. In actor-critic implementation, this TD error can be used to improve the value function estimation by taking a gradient descent step. I use $\hat {V}^{\pi}_{\phi}$ to emphasize that it's a neural network parameterized by $\phi$:
-$$
 
+$$
 \phi \leftarrow \phi + \alpha^{\phi} \left[r(s_t, a_t) + \gamma \hat{V_{\phi}}^{\pi}(s_{t+1}) - \hat{V}^{\pi}_{\phi}(s_t) \right]\nabla \hat{V}^{\pi}_{\phi}
-
 $$
+
 ## **Why is any value function unbiased as a baseline?**
 This is one of the results that initially come across as very surprising for me, but also **undergirds the whole notion of advantage function and actor-critic**. To think about advantage function in the broader sense, it is a measure of how good a state-action is compared with other actions from the state. Given a state-wise baseline $b(s_t)$, we can disentangle the state and action distribution:
-$$\begin{align} \mathbb{E}_{s_t, a_t \sim\pi(\cdot|\cdot)}\left[ \sum_{t=0}^{\infty}\nabla \log \pi_\theta(a_t | s_t) b(s_t)\right] &= \sum_{t=0}^{\infty} \mathbb{E}_{s_t\sim p_\theta(s)} \left[ b(s_t)\left(\mathbb{E}_{a \sim \pi(\cdot | s_t)}\left[  \nabla\log\pi_{\theta}(a|s_t)\right] \right)\right] \\ 
+
+$$
+\begin{align} \mathbb{E}_{s_t, a_t \sim\pi(\cdot|\cdot)}\left[ \sum_{t=0}^{\infty}\nabla \log \pi_\theta(a_t | s_t) b(s_t)\right] &= \sum_{t=0}^{\infty} \mathbb{E}_{s_t\sim p_\theta(s)} \left[ b(s_t)\left(\mathbb{E}_{a \sim \pi(\cdot | s_t)}\left[  \nabla\log\pi_{\theta}(a|s_t)\right] \right)\right] \\ 
 &= \sum_{t=0}^{\infty} \mathbb{E}_{s_t\sim p_\theta(s)}\left[b(s_t) \sum_a \nabla \log\pi_{\theta}(a|s_t)\pi(a|s_t)\right] \\ 
 &= \sum_{t=0}^{\infty} \mathbb{E}_{s_t\sim p_\theta(s)}\left[b(s_t) \nabla \sum_a  \pi(a|s_t)\right] = 0
 \end{align}
 $$
+
 so whichever value function we use, it will be an unbiased baseline. However, there is a caveat: When we use TD difference to estimate $G_t$ and **bootstrap** a future $V(s_{t+T})$, this is will no longer be unbiased, though the variance can be further reduced as a tradeoff. 
+
+
 
 ## **Now we're doing SGD, but can we rewrite an optimization problem?**
 (now going into TRPO)
