@@ -3,15 +3,19 @@ title: Form REINFORCE to PPO - Classic Policy Gradient Methods Revisited
 date: 2025-09-24
 ---
 ## **Stitching the narrative arc**
-When I started studying reinforcement learning, I found blogs to be a very good medium for gaining intuition. There are as many ways of presenting ideas as there are bloggers online. Yet I sometimes find myself struggling to see the connective tissue between different algorithm boxes. Inspired by other blogs in the area (@Seita's place and @lil'log), and the recognition how human mind craves narrative, I decided to write down my own learning diary here - Not that the world needs yet another ML blogger, but the aim is threefold: to clarify the logic by writing it down, to create a scaffold I can revisit in the future (and thus a daguerreotype of understanding), and to share the process with anyone who might find value in it. I try to keep the flow didactic, the language casual, and the math tight. There are bound to be typøs, despite my best intentions. I notice I sometimes use the pronoun we in writing, but we don't deem that to be an issue. All notations apart from the typös follow Andrew Barto and Richard Sutton's Introduction to Reinforcement Learning. 
+When I started studying reinforcement learning, I found blogs to be a very good medium for gaining intuition. There are as many ways of presenting ideas as there are bloggers online. Yet I sometimes find myself struggling to see how the various algorithm boxes fit together into a coherent picture. Inspired by other blogs in the area (@Seita's place and @lil'log), and the recognition that a coherent narrative is conductive to deeper understanding, I decided to write down my own learning diary here. My aim is threefold: to fully understand the logic by writing it down, to create a scaffold I can revisit in the future, and to share the process with anyone who might find value in it. I try to keep the flow didactic, the language casual, and the math tight. There are bound to be typøs, despite my best intentions. All notations apart from the typøs follow Andrew Barto and Richard Sutton's Introduction to Reinforcement Learning.
 
-Policy gradients and value-based are two families of methods, which are very loosely analogous to drawing a map (learning a $Q$ and/or $V$ function) vs becoming a better driver (update the $\pi$ directly). Policy gradients handle and stochastic policy more naturally, although I doubt whether a softmax layer on $Q$ can also do that. Here we focus on the policy gradients family, specifically how the vanilla REINFORCE logically develops into PPO.
+Policy gradients and value-based are two families of methods. Suppose we want to arrive at a place, I tend to think of value-based as drawing a map, whereas policy gradients is like building intuition. Value-based RL learns action values $Q(s,a)$ and induces a policy by acting near-greedily (i.e. $\epsilon$-greedy). Some algorithms for value-based methods: SARSA, Q-Learning, DQN, etc. 
+
+Contrarily, the **policy-based** methods parameterizes a policy function $\pi(s,a)$ (which represents the probability of taking a given action) and directly pushes parameter by estimating $J_\theta$. For discrete actions, logits from a network go through softmax; for continuous actions, policies can be Gaussian:
+
+$$\pi_\theta(a|s) = \frac{e^{h_\theta(s,a)}}{\sum_{a’} e^{h_\theta(s,a’)}} \quad \quad \pi_\theta(a|s)=\mathcal N(\mu_\theta(s), \Sigma_\theta(s))$$
+
+A subtle question: what's the difference between softmax-weighing-Q-values and a discrete policy? On the surface, both measures a (state, action) preference; but Q values must satisfy Bellman equation whereas policy do not. Quintessentially, that is why we can later bootstrap value functions in Actor-Critic, and why policy methods suffer from high variance.
+
+Here we focus on the policy gradients family, specifically how the vanilla REINFORCE logically develops into PPO.
 
 The fundamental goal of Policy Gradients is to select a $\theta = \arg \max J_{\pi}(\theta)$ , namely, find a parameter $\theta$ for policy $\pi_\theta$ that maximizes $J_\pi(\theta)$ , which is (on average) how much rewards an episode collects under a policy $\pi_{\theta}$.
-
-$$
-J_{\pi}(\theta) = \mathbb{E}\left[ \sum_{t=0}^{\infty} \gamma^{t}r(s_t, a_t)\right] = \mathbb{E}_{\tau \sim \pi_\theta}\left[r(\tau)\right]
-$$
 
 ## **How do we maximize this objective?**
 
