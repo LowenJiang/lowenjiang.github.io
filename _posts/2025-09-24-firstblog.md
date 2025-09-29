@@ -204,7 +204,13 @@ L^{CLIP+VF+S}(\theta) &= 
 \mathbb{E}_t \Big[ L_t^{CLIP}(\theta) - c_1 L_t^{VF}(\theta) + c_2 S[\pi_\theta](s_t) \Big] \\\\
 &(\text{Proximal Policy Optimiation})\end{align}$$
 
-Where S is the entropy term that functions as a regularizer to encourage sufficiently exploratory policies, and is independent of the reward signals. From the actor-critic perspective, we may use the same $\lambda$ for GAE(Generalized Advantage Estimator) (policy) and TD($\lambda$) (value function), which controls how the reward signals flow into objective function. Those are all tricks about finding balance between Monte Carlo and TD(0). 
+Where S is the entropy term that functions as a regularizer to encourage sufficiently exploratory policies, and is independent of the reward signals. From the actor-critic perspective, we may use the same $\lambda$ for GAE(Generalized Advantage Estimator) (policy) and TD($\lambda$) (value function), which controls how the reward signals flow into objective function. Those are all tricks about finding balance between Monte Carlo and TD(0). In PPO you collect on-policy rollouts, estimate returns and advantages with GAE/TD-lambda, fit the value function by bootstrapping, build the clipped surrogate policy loss plus an entropy bonus, and optimize actor and critic jointly. Personally I find the idea of GAE quite similar to TD-lambda, so I'll simply write the form down here:
+
+$$
+\hat A_t^{\mathrm{GAE}(\gamma,\lambda)}
+= \sum_{l=0}^\infty (\gamma\lambda)^l \,\delta_{t+l}
+$$
+
 ## **Closing note: Bias-Stability-Variance tradeoff**
 From vanilla REINFORCE, we have finally arrived at PPO — a method that openly embraces **controlled bias** in exchange for stability and variance reduction.
 - **Surrogate objective (TRPO/PPO)**: The surrogate L is already an approximation to the true objective J. That approximation introduces bias, but in return gives a far more stable update rule than naïve gradient ascent.
